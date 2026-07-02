@@ -1,0 +1,29 @@
+{
+  "name": "ani_3d",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.11.3",
+    "@tresjs/cientos": "^4.3.0",
+    "@tresjs/core": "^4.3.1",
+    "@tresjs/nuxt": "^5.6.3",
+    "gsap": "^3.15.0",
+    "nuxt": "^4.4.8",
+    "pinia": "^3",
+    "three": "^0.177.0",
+    "vue": "^3.5.38",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.185.0",
+    "typescript": "^5.8.3",
+    "vite-plugin-glsl": "^1.6.0"
+  }
+}
