@@ -120,7 +120,7 @@ const onCouchClick = (event: any) => { event.stopPropagation(); store.openCustom
     <PS5Console :position="[1.5, 0.6, -9.6]" :rotation="[0, -0.2, 0]" />
 
     <!-- The Interactive TV on North Wall -->
-    <InteractiveTV :position="[0, 2, -9.8]" />
+    <InteractiveTV :position="[0, 2, -9.75]" />
 
     <!-- The Interactive Ceiling Fan -->
     <InteractiveFan :position="[0, 3.8, 0]" />

@@ -34,9 +34,10 @@ const onReady = () => {
 
 <template>
   <TresCanvas v-bind="gl" @ready="onReady" class="cinematic-canvas">
+    <!-- Spawn the camera closer to the TV so the couch doesn't block the view of the PS5 -->
     <TresPerspectiveCamera 
       ref="cameraRef"
-      :position="[0, 1.6, 5]" 
+      :position="[0, 1.6, -4]" 
       :fov="75" 
       :near="0.1" 
       :far="1000" 
