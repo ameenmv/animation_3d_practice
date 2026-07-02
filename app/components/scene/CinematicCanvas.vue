@@ -6,7 +6,7 @@ import { PointerLockControls } from '@tresjs/cientos'
 import { useRealEstateStore } from '~/stores/realEstateStore'
 import { useFirstPersonController } from '~/composables/useFirstPersonController'
 
-import ApartmentModel from './ApartmentModel.vue'
+import VillaModel from './VillaModel.vue'
 import LightingSystem from './LightingSystem.vue'
 
 const store = useRealEstateStore()
@@ -42,17 +42,16 @@ const onReady = () => {
       :far="1000" 
     />
 
-    <!-- Mouse look controls (automatically binds click to #lock-button) -->
+    <!-- Mouse look controls -->
     <PointerLockControls 
       make-default
-      selector="#lock-button"
       @lock="store.setPointerLocked(true)" 
       @unlock="store.setPointerLocked(false)" 
     />
 
     <!-- The Environment -->
     <LightingSystem />
-    <ApartmentModel />
+    <VillaModel />
 
   </TresCanvas>
 </template>

@@ -11,6 +11,17 @@ useSeoMeta({
 // predefined color palettes
 const wallColors = ['#ffffff', '#e0e0e0', '#a8b5b2', '#2c3e50', '#d4c4b7']
 const floorColors = ['#8a7964', '#5c4d3c', '#d9d9d9', '#222222', '#c6bcae']
+const couchColors = ['#34495e', '#8e44ad', '#c0392b', '#16a085', '#f39c12']
+
+const lockPointer = () => {
+  // Find the TresJS canvas and request pointer lock directly on it.
+  // This satisfies the browser's security requirement (synchronous click handler)
+  // and satisfies Three.js PointerLockControls (which expects the canvas to be the locked element).
+  const canvas = document.querySelector('canvas')
+  if (canvas) {
+    canvas.requestPointerLock()
+  }
+}
 </script>
 
 <template>
@@ -27,7 +38,7 @@ const floorColors = ['#8a7964', '#5c4d3c', '#d9d9d9', '#222222', '#c6bcae']
           WASD to move. Mouse to look.<br>
           Click on walls, floors, or doors to interact.
         </p>
-        <button id="lock-button" class="primary-btn">ENTER APARTMENT</button>
+        <button class="primary-btn" @click="lockPointer">ENTER APARTMENT</button>
       </div>
     </div>
 
@@ -37,15 +48,15 @@ const floorColors = ['#8a7964', '#5c4d3c', '#d9d9d9', '#222222', '#c6bcae']
       
       <div class="color-picker">
         <div 
-          v-for="color in (store.customizerTarget === 'wall' ? wallColors : floorColors)" 
+          v-for="color in (store.customizerTarget === 'wall' ? wallColors : store.customizerTarget === 'floor' ? floorColors : couchColors)" 
           :key="color"
           class="color-swatch"
           :style="{ backgroundColor: color }"
-          @click="store.customizerTarget === 'wall' ? store.setWallColor(color) : store.setFloorColor(color)"
+          @click="store.customizerTarget === 'wall' ? store.setWallColor(color) : store.customizerTarget === 'floor' ? store.setFloorColor(color) : store.setCouchColor(color)"
         ></div>
       </div>
       
-      <button id="lock-button" class="secondary-btn" style="margin-top: 1rem;">Close</button>
+      <button class="secondary-btn" style="margin-top: 1rem;" @click="lockPointer">Close</button>
     </div>
 
     <!-- Global Controls (Time of Day) -->
@@ -75,12 +86,23 @@ const floorColors = ['#8a7964', '#5c4d3c', '#d9d9d9', '#222222', '#c6bcae']
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 6px;
-  height: 6px;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.crosshair::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
   background: white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  mix-blend-mode: difference;
 }
 
 .overlay-menu, .customizer-panel, .global-controls {

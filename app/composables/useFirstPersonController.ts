@@ -6,6 +6,12 @@ import { useRealEstateStore } from '~/stores/realEstateStore'
 export function useFirstPersonController(camera: PerspectiveCamera) {
   const store = useRealEstateStore()
   
+  // Camera FOV state for Zooming
+  let targetFov = 75
+  const minFov = 30
+  const maxFov = 100
+  const fovSpeed = 5
+  
   const moveState = {
     forward: false,
     backward: false,
@@ -59,14 +65,24 @@ export function useFirstPersonController(camera: PerspectiveCamera) {
     }
   }
 
+  const onWheel = (e: WheelEvent) => {
+    if (!store.isPointerLocked) return
+    // Scroll up (negative delta) = zoom in (decrease FOV)
+    // Scroll down (positive delta) = zoom out (increase FOV)
+    targetFov += Math.sign(e.deltaY) * fovSpeed
+    targetFov = Math.max(minFov, Math.min(maxFov, targetFov))
+  }
+
   onMounted(() => {
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('wheel', onWheel, { passive: false })
   })
 
   onUnmounted(() => {
     window.removeEventListener('keydown', onKeyDown)
     window.removeEventListener('keyup', onKeyUp)
+    window.removeEventListener('wheel', onWheel)
   })
 
   const { onLoop } = useRenderLoop()
@@ -101,6 +117,12 @@ export function useFirstPersonController(camera: PerspectiveCamera) {
     // Update store for debugging or map
     store.playerPosition.x = camera.position.x
     store.playerPosition.z = camera.position.z
+
+    // Smoothly interpolate Camera FOV for sniper zoom
+    if (Math.abs(camera.fov - targetFov) > 0.1) {
+      camera.fov += (targetFov - camera.fov) * 10.0 * delta
+      camera.updateProjectionMatrix()
+    }
   })
 
   return {}
