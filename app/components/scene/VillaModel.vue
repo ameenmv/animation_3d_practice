@@ -13,17 +13,13 @@ const store = useRealEstateStore()
 const floorMaterial = computed(() => new MeshStandardMaterial({ color: new Color(store.floorColor), roughness: 0.8 }))
 const wallMaterial = computed(() => new MeshStandardMaterial({ color: new Color(store.wallColor), roughness: 0.9, side: DoubleSide }))
 const couchMaterial = computed(() => new MeshStandardMaterial({ color: new Color(store.couchColor), roughness: 1.0 }))
-
-const onWallClick = (event: any) => { event.stopPropagation(); store.openCustomizer('wall') }
-const onFloorClick = (event: any) => { event.stopPropagation(); store.openCustomizer('floor') }
-const onCouchClick = (event: any) => { event.stopPropagation(); store.openCustomizer('couch') }
 </script>
 
 <template>
   <TresGroup>
     <!-- ════════ LIVING ROOM ════════ -->
     <!-- Floor -->
-    <TresMesh :position="[0, 0, 0]" :rotation="[-Math.PI / 2, 0, 0]" @click="onFloorClick" receive-shadow>
+    <TresMesh :position="[0, 0, 0]" :rotation="[-Math.PI / 2, 0, 0]" receive-shadow>
       <TresPlaneGeometry :args="[20, 20]" />
       <primitive :object="floorMaterial" />
     </TresMesh>
@@ -35,27 +31,27 @@ const onCouchClick = (event: any) => { event.stopPropagation(); store.openCustom
     </TresMesh>
 
     <!-- Solid Walls (North, East, West) -->
-    <TresMesh :position="[0, 2, -10]" @click="onWallClick" cast-shadow receive-shadow>
+    <TresMesh :position="[0, 2, -10]" cast-shadow receive-shadow>
       <TresBoxGeometry :args="[20, 4, 0.4]" />
       <primitive :object="wallMaterial" />
     </TresMesh>
     
-    <TresMesh :position="[10, 2, 0]" @click="onWallClick" cast-shadow receive-shadow>
+    <TresMesh :position="[10, 2, 0]" cast-shadow receive-shadow>
       <TresBoxGeometry :args="[0.4, 4, 20]" />
       <primitive :object="wallMaterial" />
     </TresMesh>
 
-    <TresMesh :position="[-10, 2, 0]" @click="onWallClick" cast-shadow receive-shadow>
+    <TresMesh :position="[-10, 2, 0]" cast-shadow receive-shadow>
       <TresBoxGeometry :args="[0.4, 4, 20]" />
       <primitive :object="wallMaterial" />
     </TresMesh>
 
     <!-- South Wall (Glass looking out to patio) -->
-    <TresMesh :position="[-8, 2, 10]" @click="onWallClick" cast-shadow receive-shadow>
+    <TresMesh :position="[-8, 2, 10]" cast-shadow receive-shadow>
       <TresBoxGeometry :args="[4, 4, 0.4]" />
       <primitive :object="wallMaterial" />
     </TresMesh>
-    <TresMesh :position="[8, 2, 10]" @click="onWallClick" cast-shadow receive-shadow>
+    <TresMesh :position="[8, 2, 10]" cast-shadow receive-shadow>
       <TresBoxGeometry :args="[4, 4, 0.4]" />
       <primitive :object="wallMaterial" />
     </TresMesh>
@@ -83,7 +79,7 @@ const onCouchClick = (event: any) => { event.stopPropagation(); store.openCustom
 
     <!-- ════════ LIVING ROOM FURNITURE ════════ -->
     <!-- The Arabic Majlis Couch (Lower to the ground, traditional style) -->
-    <TresGroup :position="[0, 0.2, 0]" @click="onCouchClick">
+    <TresGroup :position="[0, 0.2, 0]">
       <!-- Wooden Base -->
       <TresMesh :position="[0, -0.1, 0]" cast-shadow receive-shadow>
         <TresBoxGeometry :args="[7, 0.2, 3.2]" />

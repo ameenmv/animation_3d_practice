@@ -31,40 +31,15 @@ const lockPointer = () => {
     <div v-if="store.isPointerLocked" class="crosshair"></div>
 
     <!-- Start / Pause Menu -->
-    <div v-if="!store.isPointerLocked && !store.customizerTarget" class="overlay-menu flex-center">
+    <div v-if="!store.isPointerLocked" class="overlay-menu flex-center">
       <div class="glass-panel text-center">
         <h1 class="massive-text" style="font-size: 3rem; margin-bottom: 1rem;">VIRTUAL TOUR</h1>
         <p class="subtitle" style="margin-bottom: 2rem;">
           WASD to move. Mouse to look.<br>
-          Click on walls, floors, or doors to interact.
+          Scroll Wheel to Zoom in/out.<br>
+          Click the PS5 or TV to interact.
         </p>
         <button class="primary-btn" @click="lockPointer">ENTER APARTMENT</button>
-      </div>
-    </div>
-
-    <!-- Customization Menu -->
-    <div v-if="store.customizerTarget" class="customizer-panel">
-      <h2>Customize {{ store.customizerTarget }}</h2>
-      
-      <div class="color-picker">
-        <div 
-          v-for="color in (store.customizerTarget === 'wall' ? wallColors : store.customizerTarget === 'floor' ? floorColors : couchColors)" 
-          :key="color"
-          class="color-swatch"
-          :style="{ backgroundColor: color }"
-          @click="store.customizerTarget === 'wall' ? store.setWallColor(color) : store.customizerTarget === 'floor' ? store.setFloorColor(color) : store.setCouchColor(color)"
-        ></div>
-      </div>
-      
-      <button class="secondary-btn" style="margin-top: 1rem;" @click="lockPointer">Close</button>
-    </div>
-
-    <!-- Global Controls (Time of Day) -->
-    <div class="global-controls">
-      <div class="tod-toggle">
-        <button :class="{ active: store.timeOfDay === 'morning' }" @click="store.setTimeOfDay('morning')">Morning</button>
-        <button :class="{ active: store.timeOfDay === 'sunset' }" @click="store.setTimeOfDay('sunset')">Sunset</button>
-        <button :class="{ active: store.timeOfDay === 'night' }" @click="store.setTimeOfDay('night')">Night</button>
       </div>
     </div>
 
