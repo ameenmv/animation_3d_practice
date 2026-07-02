@@ -39,33 +39,18 @@ export function useCinematicScroll() {
   function setupCameraChoreography(camera: PerspectiveCamera, sceneGroup: Group) {
     cameraTl = gsap.timeline({
       scrollTrigger: {
-        trigger: 'body', // The whole body scrolls
+        trigger: 'body',
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 1.5,
+        scrub: 0.1, // very fast scrub for immediate uniform response
         onUpdate: (self) => {
           globalUniforms.uScrollProgress.value = self.progress
         }
       }
     })
-
-    // Cinematic camera flight path
-    cameraTl.to(camera.position, {
-      z: -10, // Fly forward through particles
-      y: -2,
-      ease: 'power1.inOut'
-    }, 0)
-
-    cameraTl.to(camera.rotation, {
-      x: 0.2, // Look slightly up as we fly
-      ease: 'power1.inOut'
-    }, 0)
     
-    // Rotate the entire scene slightly on scroll
-    cameraTl.to(sceneGroup.rotation, {
-      y: Math.PI * 0.25,
-      ease: 'none'
-    }, 0)
+    // We don't move the camera anymore; the MorphingOrb shader handles all 
+    // scaling, displacement, and color shifting based on uScrollProgress!
   }
 
   // Ticker for global time

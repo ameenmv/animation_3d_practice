@@ -1,60 +1,59 @@
 <script setup lang="ts">
-import { shallowRef, watchEffect, onUnmounted, onMounted } from 'vue'
-import { PerspectiveCamera, Group } from 'three'
-import { useCinematicScroll } from '~/composables/useCinematicScroll'
-import ParticleSwarm from './ParticleSwarm.vue'
-import GlassDispersion from './GlassDispersion.vue'
+import { shallowRef, watch, onMounted } from 'vue'
+import { PerspectiveCamera, PCFSoftShadowMap, SRGBColorSpace } from 'three'
+import { useTresContext } from '@tresjs/core'
+import { PointerLockControls } from '@tresjs/cientos'
+import { useRealEstateStore } from '~/stores/realEstateStore'
+import { useFirstPersonController } from '~/composables/useFirstPersonController'
 
+import ApartmentModel from './ApartmentModel.vue'
+import LightingSystem from './LightingSystem.vue'
+
+const store = useRealEstateStore()
 const cameraRef = shallowRef<PerspectiveCamera | null>(null)
-const sceneGroupRef = shallowRef<Group | null>(null)
+const controlsRef = shallowRef<any>(null)
 
-const { setupMouseTracking, setupCameraChoreography, startTicker, cleanup } = useCinematicScroll()
+// Configure Renderer for realism
+const gl = {
+  clearColor: '#87CEEB', // Sky blue
+  shadows: true,
+  alpha: false,
+  shadowMapType: PCFSoftShadowMap,
+  outputColorSpace: SRGBColorSpace,
+  toneMappingExposure: 1.2,
+  antialias: true
+}
 
-onMounted(() => {
-  const cleanupMouse = setupMouseTracking()
-  startTicker()
-  
-  // We need to wait for refs to be populated by TresJS
-  const unwatch = watchEffect(() => {
-    if (cameraRef.value && sceneGroupRef.value) {
-      setupCameraChoreography(cameraRef.value, sceneGroupRef.value)
-      unwatch()
-    }
-  })
-
-  onUnmounted(() => {
-    cleanupMouse()
-    cleanup()
-  })
-})
+// Initialize custom WASD controller once context is ready
+const onReady = () => {
+  if (cameraRef.value) {
+    useFirstPersonController(cameraRef.value)
+  }
+}
 </script>
 
 <template>
-  <TresCanvas
-    window-size
-    alpha
-    antialias
-    :clear-color="'transparent'"
-    class="cinematic-canvas"
-  >
+  <TresCanvas v-bind="gl" @ready="onReady" class="cinematic-canvas">
     <TresPerspectiveCamera 
-      ref="cameraRef" 
-      :position="[0, 0, 5]" 
-      :fov="60" 
-      make-default 
+      ref="cameraRef"
+      :position="[0, 1.6, 5]" 
+      :fov="75" 
+      :near="0.1" 
+      :far="1000" 
     />
-    
-    <TresAmbientLight :intensity="1.5" />
-    <TresDirectionalLight :position="[5, 5, 5]" :intensity="3" color="#6c2bd9" />
-    <TresDirectionalLight :position="[-5, -5, -5]" :intensity="2" color="#00d4ff" />
 
-    <TresGroup ref="sceneGroupRef">
-      <!-- Particle Fluid Hero Environment -->
-      <ParticleSwarm />
-      
-      <!-- Showcase Refraction Element (Positioned far below, reached via scroll) -->
-      <GlassDispersion />
-    </TresGroup>
+    <!-- Mouse look controls (automatically binds click to #lock-button) -->
+    <PointerLockControls 
+      make-default
+      selector="#lock-button"
+      @lock="store.setPointerLocked(true)" 
+      @unlock="store.setPointerLocked(false)" 
+    />
+
+    <!-- The Environment -->
+    <LightingSystem />
+    <ApartmentModel />
+
   </TresCanvas>
 </template>
 

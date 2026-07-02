@@ -1,179 +1,187 @@
 <script setup lang="ts">
-/**
- * index.vue — Cinematic DOM Layer
- * Semantic HTML strictly separated from the WebGL canvas.
- * Handles GSAP scroll-jacking and massive typography animations.
- */
-import { onMounted, onUnmounted } from 'vue'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import SplitText from 'gsap/SplitText' // Note: Requires GSAP Club for real SplitText, but we'll fake it with custom span splitting if needed, or just block stagger.
-// We will use a custom simple word/char splitter to avoid paid plugins
+import { useRealEstateStore } from '~/stores/realEstateStore'
 
-gsap.registerPlugin(ScrollTrigger)
+const store = useRealEstateStore()
 
 useSeoMeta({
-  title: 'ANI 3D – Cinematic WebGL Experience',
-  description: 'Awwwards-winning level 3D interactive website with semantic HTML and fixed WebGL background.',
+  title: 'ANI 3D – Interactive Real Estate',
+  description: 'First-person interactive 3D property walkthrough.',
 })
 
-// Simple custom text splitter for GSAP
-function splitTypography(selector: string, type: 'chars' | 'words' = 'chars') {
-  const elements = document.querySelectorAll<HTMLElement>(selector)
-  const allSpans: HTMLElement[] = []
-  
-  elements.forEach(el => {
-    const text = el.innerText
-    el.innerHTML = ''
-    el.style.opacity = '1' // Make parent visible now that children are ready to animate
-    
-    if (type === 'chars') {
-      const chars = text.split('')
-      chars.forEach(c => {
-        const span = document.createElement('span')
-        span.innerHTML = c === ' ' ? '&nbsp;' : c
-        span.style.display = 'inline-block'
-        span.classList.add('split-char')
-        el.appendChild(span)
-        allSpans.push(span)
-      })
-    } else {
-      const words = text.split(' ')
-      words.forEach((w, i) => {
-        const span = document.createElement('span')
-        span.innerText = w + (i < words.length - 1 ? ' ' : '')
-        span.style.display = 'inline-block'
-        span.style.overflow = 'hidden'
-        
-        const inner = document.createElement('span')
-        inner.innerText = span.innerText
-        inner.style.display = 'inline-block'
-        inner.classList.add('split-word-inner')
-        
-        span.innerText = ''
-        span.appendChild(inner)
-        el.appendChild(span)
-        allSpans.push(inner)
-      })
-    }
-  })
-  return allSpans
-}
-
-onMounted(() => {
-  // ── 1. Hero Reveal ──────────────────────────────────────────
-  const heroChars = splitTypography('.hero__title', 'chars')
-  gsap.fromTo(heroChars, 
-    { y: 100, opacity: 0, rotateX: -90 },
-    { 
-      y: 0, opacity: 1, rotateX: 0, 
-      duration: 1.5, 
-      stagger: 0.04, 
-      ease: 'power4.out',
-      delay: 0.5
-    }
-  )
-
-  gsap.fromTo('.hero__subtitle', 
-    { opacity: 0, y: 30 },
-    { opacity: 1, y: 0, duration: 1.5, ease: 'power2.out', delay: 1.5 }
-  )
-
-  // ── 2. Process Section (Horizontal Scroll-Jacking) ─────────
-  const processSection = document.querySelector('.process-wrapper')
-  const processCards = gsap.utils.toArray('.process-card')
-  
-  if (processSection && processCards.length) {
-    gsap.to(processCards, {
-      xPercent: -100 * (processCards.length - 1),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.process-container',
-        pin: true,
-        scrub: 1,
-        start: 'top top',
-        end: () => `+=${processSection.scrollWidth}`
-      }
-    })
-  }
-
-  // ── 3. Showcase Reveal ─────────────────────────────────────
-  gsap.fromTo('.showcase-overlay',
-    { opacity: 0 },
-    {
-      opacity: 1,
-      scrollTrigger: {
-        trigger: '#showcase-section',
-        start: 'top center',
-        end: 'center center',
-        scrub: true
-      }
-    }
-  )
-})
-
-onUnmounted(() => {
-  ScrollTrigger.getAll().forEach(t => t.kill())
-})
+// predefined color palettes
+const wallColors = ['#ffffff', '#e0e0e0', '#a8b5b2', '#2c3e50', '#d4c4b7']
+const floorColors = ['#8a7964', '#5c4d3c', '#d9d9d9', '#222222', '#c6bcae']
 </script>
 
 <template>
   <main class="semantic-dom-layer">
     
-    <!-- ════════ HERO ════════ -->
-    <section id="hero-section" class="screen hero">
-      <div class="container hero-content">
-        <!-- opacity 0 initially to prevent FOUC before splitTypography runs -->
-        <h1 class="hero__title massive-text" style="opacity: 0">
-          CINEMATIC<br>WEBGL
-        </h1>
-        <p class="hero__subtitle">
-          An organic fluid particle system powered by pure mathematics and GLSL. Scroll to descend.
+    <!-- Crosshair -->
+    <div v-if="store.isPointerLocked" class="crosshair"></div>
+
+    <!-- Start / Pause Menu -->
+    <div v-if="!store.isPointerLocked && !store.customizerTarget" class="overlay-menu flex-center">
+      <div class="glass-panel text-center">
+        <h1 class="massive-text" style="font-size: 3rem; margin-bottom: 1rem;">VIRTUAL TOUR</h1>
+        <p class="subtitle" style="margin-bottom: 2rem;">
+          WASD to move. Mouse to look.<br>
+          Click on walls, floors, or doors to interact.
         </p>
+        <button id="lock-button" class="primary-btn">ENTER APARTMENT</button>
       </div>
-    </section>
+    </div>
 
-    <!-- ════════ PROCESS ════════ -->
-    <section id="process-section" class="process-container">
-      <div class="process-wrapper">
-        <article class="process-card screen">
-          <div class="container">
-            <h2 class="massive-text">01. DISCOVER</h2>
-            <p class="process-desc">We break down the generic web and establish a deeply atmospheric aesthetic.</p>
-          </div>
-        </article>
-        <article class="process-card screen">
-          <div class="container">
-            <h2 class="massive-text">02. ENGINEER</h2>
-            <p class="process-desc">Raw shaders. Explicit memory management. Mathematical motion curves.</p>
-          </div>
-        </article>
-        <article class="process-card screen">
-          <div class="container">
-            <h2 class="massive-text">03. RENDER</h2>
-            <p class="process-desc">60 Frames Per Second. Uncompromising visual fidelity.</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ════════ SHOWCASE (GLASS DISPERSION) ════════ -->
-    <section id="showcase-section" class="screen showcase">
-      <!-- 
-        Option A implemented: 
-        The semantic HTML text is visually hidden (sr-only) for accessibility.
-        The visible text is rendered via WebGL <Text3D> behind the glass mesh.
-      -->
-      <div class="sr-only">
-        <h2>DISPERSION</h2>
-        <p>A true WebGL glass refraction fragment shader distorting the text behind it.</p>
+    <!-- Customization Menu -->
+    <div v-if="store.customizerTarget" class="customizer-panel">
+      <h2>Customize {{ store.customizerTarget }}</h2>
+      
+      <div class="color-picker">
+        <div 
+          v-for="color in (store.customizerTarget === 'wall' ? wallColors : floorColors)" 
+          :key="color"
+          class="color-swatch"
+          :style="{ backgroundColor: color }"
+          @click="store.customizerTarget === 'wall' ? store.setWallColor(color) : store.setFloorColor(color)"
+        ></div>
       </div>
       
-      <!-- Subtle visual overlay to frame the WebGL glass -->
-      <div class="showcase-overlay container">
-        <p class="showcase-caption">Raw WebGL2 Transmission & Dispersion</p>
+      <button id="lock-button" class="secondary-btn" style="margin-top: 1rem;">Close</button>
+    </div>
+
+    <!-- Global Controls (Time of Day) -->
+    <div class="global-controls">
+      <div class="tod-toggle">
+        <button :class="{ active: store.timeOfDay === 'morning' }" @click="store.setTimeOfDay('morning')">Morning</button>
+        <button :class="{ active: store.timeOfDay === 'sunset' }" @click="store.setTimeOfDay('sunset')">Sunset</button>
+        <button :class="{ active: store.timeOfDay === 'night' }" @click="store.setTimeOfDay('night')">Night</button>
       </div>
-    </section>
+    </div>
 
   </main>
 </template>
+
+<style scoped>
+.semantic-dom-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none; /* Let clicks pass through unless on specific UI elements */
+  z-index: 10;
+}
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+
+.overlay-menu, .customizer-panel, .global-controls {
+  pointer-events: auto;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(5px);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.primary-btn {
+  background: white;
+  color: black;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.primary-btn:hover {
+  transform: scale(1.05);
+}
+
+.customizer-panel {
+  position: absolute;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+  background: rgba(20, 20, 20, 0.9);
+  padding: 2rem;
+  border-radius: 12px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-picker {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.color-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: transform 0.2s;
+}
+.color-swatch:hover {
+  transform: scale(1.2);
+  border-color: white;
+}
+
+.global-controls {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  padding: 0.5rem;
+  border-radius: 30px;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tod-toggle button {
+  background: transparent;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.tod-toggle button.active {
+  background: white;
+  color: black;
+}
+
+.secondary-btn {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
