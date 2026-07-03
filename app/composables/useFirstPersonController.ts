@@ -75,15 +75,15 @@ export function useFirstPersonController(cameraRef: Ref<PerspectiveCamera | null
   }
 
   onMounted(() => {
-    window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('keyup', onKeyUp)
-    window.addEventListener('wheel', onWheel, { passive: false })
+    document.addEventListener('keydown', onKeyDown, { capture: true })
+    document.addEventListener('keyup', onKeyUp, { capture: true })
+    document.addEventListener('wheel', onWheel, { passive: false, capture: true })
   })
 
   onUnmounted(() => {
-    window.removeEventListener('keydown', onKeyDown)
-    window.removeEventListener('keyup', onKeyUp)
-    window.removeEventListener('wheel', onWheel)
+    document.removeEventListener('keydown', onKeyDown, { capture: true })
+    document.removeEventListener('keyup', onKeyUp, { capture: true })
+    document.removeEventListener('wheel', onWheel, { capture: true })
   })
 
   const { onLoop } = useRenderLoop()

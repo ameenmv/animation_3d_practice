@@ -23,7 +23,9 @@
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/three": "^0.185.0",
+    "playwright": "^1.61.1",
     "typescript": "^5.8.3",
     "vite-plugin-glsl": "^1.6.0"
   }

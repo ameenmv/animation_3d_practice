@@ -4,17 +4,12 @@ import { PerspectiveCamera, PCFSoftShadowMap, SRGBColorSpace } from 'three'
 import { useTresContext } from '@tresjs/core'
 import { PointerLockControls } from '@tresjs/cientos'
 import { useRealEstateStore } from '~/stores/realEstateStore'
-import { useFirstPersonController } from '~/composables/useFirstPersonController'
-
 import VillaModel from './VillaModel.vue'
 import LightingSystem from './LightingSystem.vue'
+import PlayerController from './PlayerController.vue'
 
 const store = useRealEstateStore()
 const cameraRef = shallowRef<PerspectiveCamera | null>(null)
-const controlsRef = shallowRef<any>(null)
-
-// Custom physics & WASD controller must be called synchronously so useRenderLoop works
-useFirstPersonController(cameraRef)
 
 // Configure Renderer for realism
 const gl = {
@@ -55,6 +50,7 @@ const onReady = () => {
     <!-- The Environment -->
     <LightingSystem />
     <VillaModel />
+    <PlayerController :camera="cameraRef" />
 
     </TresCanvas>
   </div>

@@ -50,10 +50,16 @@ onUnmounted(() => {
   <main class="semantic-dom-layer">
     
     <!-- Crosshair -->
-    <div v-if="store.isPointerLocked" class="crosshair"></div>
+    <div v-show="store.isPointerLocked" class="crosshair"></div>
+
+    <!-- Debug Info Overlay -->
+    <div v-show="store.isPointerLocked" class="debug-overlay">
+      <p>POS: {{ store.playerPosition.x.toFixed(2) }}, {{ store.playerPosition.z.toFixed(2) }}</p>
+      <p>FOV: {{ store.cameraFov.toFixed(1) }}</p>
+    </div>
 
     <!-- Start / Pause Menu -->
-    <div v-if="!store.isPointerLocked" class="overlay-menu flex-center">
+    <div v-show="!store.isPointerLocked" class="overlay-menu flex-center">
       <div class="glass-panel text-center">
         <h1 class="massive-text" style="font-size: 3rem; margin-bottom: 1rem;">VIRTUAL TOUR</h1>
         <p class="subtitle" style="margin-bottom: 2rem;">
@@ -100,6 +106,19 @@ onUnmounted(() => {
   background: white;
   border-radius: 50%;
   transform: translate(-50%, -50%);
+}
+
+.debug-overlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: #0f0;
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 1.2rem;
+  pointer-events: none;
 }
 
 .overlay-menu, .customizer-panel, .global-controls {
