@@ -17,6 +17,9 @@ export const useRealEstateStore = defineStore('realEstate', {
     isPointerLocked: false,
     customizerTarget: null as 'wall' | 'floor' | 'couch' | null, // What the user is currently editing
     
+    // Camera State
+    cameraFov: 75,
+    
     // Camera / Player Position (for debug or map)
     playerPosition: { x: 0, y: 1.6, z: 0 },
   }),

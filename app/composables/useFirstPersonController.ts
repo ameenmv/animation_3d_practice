@@ -1,9 +1,10 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRenderLoop } from '@tresjs/core'
-import { Vector3, PerspectiveCamera } from 'three'
+import { Vector3, type PerspectiveCamera } from 'three'
 import { useRealEstateStore } from '~/stores/realEstateStore'
+import type { Ref } from 'vue'
 
-export function useFirstPersonController(camera: PerspectiveCamera) {
+export function useFirstPersonController(cameraRef: Ref<PerspectiveCamera | null | undefined>) {
   const store = useRealEstateStore()
   
   // Camera FOV state for Zooming
@@ -90,6 +91,8 @@ export function useFirstPersonController(camera: PerspectiveCamera) {
   onLoop(({ delta }) => {
     // Only move if pointer is locked (user is in the game)
     if (!store.isPointerLocked) return
+    const camera = cameraRef.value
+    if (!camera) return
 
     // Calculate movement direction
     direction.z = Number(moveState.forward) - Number(moveState.backward)
@@ -119,9 +122,8 @@ export function useFirstPersonController(camera: PerspectiveCamera) {
     store.playerPosition.z = camera.position.z
 
     // Smoothly interpolate Camera FOV for sniper zoom
-    if (Math.abs(camera.fov - targetFov) > 0.1) {
-      camera.fov += (targetFov - camera.fov) * 10.0 * delta
-      camera.updateProjectionMatrix()
+    if (Math.abs(store.cameraFov - targetFov) > 0.1) {
+      store.cameraFov += (targetFov - store.cameraFov) * 10.0 * delta
     }
   })
 

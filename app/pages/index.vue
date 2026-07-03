@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRealEstateStore } from '~/stores/realEstateStore'
+import { onMounted, onUnmounted } from 'vue'
 
 const store = useRealEstateStore()
 
@@ -14,14 +15,35 @@ const floorColors = ['#8a7964', '#5c4d3c', '#d9d9d9', '#222222', '#c6bcae']
 const couchColors = ['#34495e', '#8e44ad', '#c0392b', '#16a085', '#f39c12']
 
 const lockPointer = () => {
-  // Find the TresJS canvas and request pointer lock directly on it.
-  // This satisfies the browser's security requirement (synchronous click handler)
-  // and satisfies Three.js PointerLockControls (which expects the canvas to be the locked element).
-  const canvas = document.querySelector('canvas')
-  if (canvas) {
-    canvas.requestPointerLock()
+  try {
+    const canvas = document.querySelector('#game-canvas-container canvas')
+    if (canvas) {
+      canvas.requestPointerLock()
+    } else {
+      alert('Error: Canvas not found by selector #game-canvas-container canvas')
+    }
+  } catch (err: any) {
+    alert('Error requesting pointer lock: ' + err.message)
   }
 }
+
+const handlePointerLockChange = () => {
+  store.setPointerLocked(!!document.pointerLockElement)
+}
+
+const handlePointerLockError = (event: Event) => {
+  alert('Browser rejected Pointer Lock! This usually means the click was not considered a direct user gesture, or there is a browser security restriction.')
+}
+
+onMounted(() => {
+  document.addEventListener('pointerlockchange', handlePointerLockChange)
+  document.addEventListener('pointerlockerror', handlePointerLockError)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('pointerlockchange', handlePointerLockChange)
+  document.removeEventListener('pointerlockerror', handlePointerLockError)
+})
 </script>
 
 <template>

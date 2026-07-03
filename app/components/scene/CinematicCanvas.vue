@@ -13,6 +13,9 @@ const store = useRealEstateStore()
 const cameraRef = shallowRef<PerspectiveCamera | null>(null)
 const controlsRef = shallowRef<any>(null)
 
+// Custom physics & WASD controller must be called synchronously so useRenderLoop works
+useFirstPersonController(cameraRef)
+
 // Configure Renderer for realism
 const gl = {
   clearColor: '#87CEEB', // Sky blue
@@ -26,19 +29,18 @@ const gl = {
 
 // Initialize custom WASD controller once context is ready
 const onReady = () => {
-  if (cameraRef.value) {
-    useFirstPersonController(cameraRef.value)
-  }
+  // Empty, cameraRef gets populated here automatically
 }
 </script>
 
 <template>
-  <TresCanvas v-bind="gl" @ready="onReady" class="cinematic-canvas">
+  <div id="game-canvas-container">
     <!-- Spawn the camera closer to the TV so the couch doesn't block the view of the PS5 -->
-    <TresPerspectiveCamera 
+    <TresCanvas v-bind="gl" @ready="onReady" class="cinematic-canvas">
+      <TresPerspectiveCamera 
       ref="cameraRef"
       :position="[0, 1.6, -4]" 
-      :fov="75" 
+      :fov="store.cameraFov" 
       :near="0.1" 
       :far="1000" 
     />
@@ -54,14 +56,21 @@ const onReady = () => {
     <LightingSystem />
     <VillaModel />
 
-  </TresCanvas>
+    </TresCanvas>
+  </div>
 </template>
 
 <style scoped>
+#game-canvas-container {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
 .cinematic-canvas {
-  position: fixed !important;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none; /* Crucial: Let DOM clicks pass through */
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 </style>
